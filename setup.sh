@@ -55,7 +55,13 @@ docker build -t tyk-mock-mcp-server:local /tmp/tyk-mock-mcp-server
 kind load docker-image tyk-mock-mcp-server:local --name "$CLUSTER"
 
 helm repo add tyk-helm https://helm.tyk.io/public/helm/charts/ >/dev/null 2>&1 || true
-helm repo update >/dev/null
+# Scoped to just this repo, not `helm repo update` (no args) — that refreshes
+# EVERY repo configured on your machine, and fails the whole script under
+# `set -e` if any unrelated one (a stale/dead repo from some other project)
+# is unreachable. Confirmed live: a laptop with a dead
+# https://kubernetes.github.io/dashboard/ entry aborted setup.sh right here
+# even though it has nothing to do with Tyk.
+helm repo update tyk-helm >/dev/null
 
 kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
 
