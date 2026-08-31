@@ -1,0 +1,40 @@
+# The custom Tyk OSS gRPC coprocess plugin that hand-rolls RFC 8693-style
+# token exchange (see services/token-exchange-plugin/plugin.py). Exposes:
+#   :5555  gRPC Dispatcher — Tyk Gateway's coprocess_grpc_server points here
+#   :8081  HTTP JWKS (/.well-known/jwks.json) — acme-api's Tyk OAS def and
+#          acme-resource-api both verify exchanged tokens against this
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acme-token-exchange-plugin
+  namespace: tyk-oss
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: acme-token-exchange-plugin }
+  template:
+    metadata:
+      labels: { app: acme-token-exchange-plugin }
+    spec:
+      containers:
+        - name: acme-token-exchange-plugin
+          image: acme-token-exchange-plugin:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { containerPort: 5555, name: grpc }
+            - { containerPort: 8081, name: http }
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8081 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: acme-token-exchange-plugin
+  namespace: tyk-oss
+spec:
+  selector: { app: acme-token-exchange-plugin }
+  ports:
+    - { name: grpc, port: 5555, targetPort: 5555 }
+    - { name: http, port: 8081, targetPort: 8081 }

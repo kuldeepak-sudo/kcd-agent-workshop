@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Technical setup · Acme Support Copilot (OSS edition)</title>
+<style>
+  :root{
+    --bg:#070b16; --bg2:#0b1120; --panel:#0f1626; --panel2:#141d31; --line:#1f2940;
+    --ink:#eaf0fb; --muted:#8893ad;
+    --teal:#00d6a4; --teal2:#23ecc0; --cyan:#3bc4ff; --coral:#ff5c7a; --amber:#ffc24b; --violet:#9b8cff;
+    --grad:linear-gradient(135deg,#00d6a4,#3bc4ff);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:15px/1.65 ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);
+    background:
+      radial-gradient(1100px 600px at 90% -8%,rgba(59,196,255,.12),transparent 60%),
+      radial-gradient(900px 520px at -8% 30%,rgba(0,214,164,.10),transparent 55%),
+      var(--bg);}
+  a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}
+  code{font-family:ui-monospace,Menlo,monospace;background:var(--bg2);border:1px solid var(--line);
+    padding:1px 6px;border-radius:5px;font-size:.86em;color:var(--teal2)}
+  pre{background:#060a13;border:1px solid var(--line);border-radius:12px;padding:15px 16px;overflow:auto;
+    font:12.5px/1.6 ui-monospace,Menlo,monospace;color:#b9c6e6;margin:12px 0}
+  header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:13px 26px;border-bottom:1px solid var(--line);background:rgba(8,12,22,.78);backdrop-filter:blur(14px)}
+  .brand{display:flex;align-items:center;gap:11px}
+  .logo{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;
+    font-weight:900;color:#04140f;font-size:15px;box-shadow:0 6px 22px rgba(0,214,164,.35)}
+  .brand b{font-size:15px}.brand .sub{color:var(--muted);font-size:11px;margin-left:2px}
+  nav.toc{display:flex;gap:4px;flex-wrap:wrap}
+  nav.toc a{color:var(--muted);font-size:12.5px;padding:6px 10px;border-radius:8px;border:1px solid transparent}
+  nav.toc a:hover{color:var(--teal2);border-color:var(--line);text-decoration:none}
+  .cta{display:inline-flex;align-items:center;gap:8px;background:var(--grad);color:#04140f;border:none;
+    border-radius:10px;padding:9px 16px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
+  .cta:hover{transform:translateY(-1px);text-decoration:none}
+  .ghost{border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:8px 13px;font-size:13px}
+  .ghost:hover{border-color:var(--teal);color:var(--teal2);text-decoration:none}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 26px 90px}
+  section{padding:36px 0;border-bottom:1px solid rgba(31,41,64,.6)}
+  section:last-child{border-bottom:none}
+  .eyebrow{display:inline-block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);
+    font-weight:800;margin-bottom:12px;padding:4px 11px;border:1px solid rgba(59,196,255,.3);border-radius:999px;background:rgba(59,196,255,.07)}
+  h1{font-size:clamp(26px,4vw,38px);line-height:1.1;letter-spacing:-.5px;margin:0 0 14px;font-weight:850}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(19px,2.4vw,24px);letter-spacing:-.3px;margin:0 0 8px;font-weight:800}
+  h3{font-size:15px;margin:20px 0 4px;font-weight:700;color:var(--ink)}
+  .lead{font-size:16px;color:#c7d2e8;max-width:720px}
+  .muted{color:var(--muted)}p{margin:0 0 12px}
+  ul{margin:8px 0 14px;padding-left:20px}li{margin:4px 0}
+  table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:14px 0;font-size:13px}
+  th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--panel2);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+  tr:last-child td{border-bottom:none}
+  td .mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--teal2)}
+  .callout{display:flex;gap:13px;border:1px solid rgba(255,194,75,.3);border-radius:12px;padding:14px 16px;background:rgba(255,194,75,.06);margin:16px 0}
+  .callout.info{border-color:rgba(59,196,255,.3);background:rgba(59,196,255,.06)}
+  .callout .ic{font-size:20px}.callout .note{color:var(--muted);font-size:13.5px}
+  .finalcta{border:1px solid var(--line);border-radius:18px;padding:30px;text-align:center;background:linear-gradient(180deg,rgba(20,29,49,.6),rgba(13,19,33,.6))}
+  @media(max-width:820px){nav.toc{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">A</div><div><b>Acme Support Copilot</b><span class="sub"> · technical setup (OSS edition)</span></div></div>
+  <nav class="toc">
+    <a href="#overview">Overview</a><a href="#plugin">The plugin</a><a href="#components">Components</a><a href="#wire">On the wire</a>
+  </nav>
+  <div style="display:flex;gap:8px"><a class="ghost" href="/guide">Plain-English version</a><a class="cta" href="/">Open the app →</a></div>
+</header>
+
+<div class="wrap">
+  <section id="overview">
+    <span class="eyebrow">Technical setup</span>
+    <h1>Token exchange, <span class="g">without an Enterprise licence</span></h1>
+    <p class="lead">This demo is a port of Tyk's own <code>tyk-demo</code> repo's <code>mcp-token-exchange</code> deployment. The original uses Tyk's built-in Enterprise "OAuth 2.0 Token Exchange" middleware — a hard licence requirement. This port keeps the identical outcome (a narrowed, identity-preserving token) but gets there with a <b>custom Tyk OSS gRPC plugin</b> instead, so the whole workshop stays genuinely open source.</p>
+    <div class="callout info"><div class="ic">ℹ️</div><div class="note">Everything below was built and verified against a real Tyk OSS Gateway (v5.13.2) in a kind cluster — not written from docs alone.</div></div>
+  </section>
+
+  <section id="plugin">
+    <h2>The plugin, concretely</h2>
+    <p>A small Python gRPC service (<code>services/token-exchange-plugin</code>) implements Tyk's <code>Dispatcher</code> coprocess service and runs as a <code>postPlugins</code> hook on the <code>acme-mcp-proxy</code> API — the last step before Tyk proxies a request upstream, after its own native JWT auth has already run.</p>
+    <pre># tyk/acme-mcp-proxy.oas.json — the relevant slice
+"middleware": {
+  "global": {
+    "pluginConfig": { "driver": "grpc" },
+    "postPlugins": [{ "enabled": true, "functionName": "TokenExchangePostHook" }]
+  }
+}</pre>
+    <p>On each <code>tools/call</code>, the plugin:</p>
+    <ul>
+      <li>Reads the (already-verified) inbound JWT's <code>sub</code> and <code>entitlements</code> claim — no need to re-verify the signature, Tyk's own JWT auth already did.</li>
+      <li>Looks at the JSON-RPC body to see which tool is being called, and maps it to the one scope that tool needs (<code>customers:read</code>, <code>customers:write</code>, or <code>refunds:write</code>).</li>
+      <li><b>Not entitled?</b> Sets <code>request.return_overrides</code> — a 403 with an <code>insufficient_scope</code> body, short-circuiting before anything reaches the MCP server.</li>
+      <li><b>Entitled?</b> Mints a new RS256 JWT — <code>sub</code> preserved, <code>aud=api.acme.internal</code>, <code>azp=tyk-mcp-gateway</code>, <code>scope=</code> the one narrowed value, 60s expiry — and rewrites the outbound <code>Authorization</code> header via <code>request.set_headers</code>.</li>
+    </ul>
+    <p>The plugin also serves its own JWKS (<code>/.well-known/jwks.json</code>) so the downstream <code>acme-api</code> route — and <code>acme-resource-api</code> itself — can independently verify the exchanged token's signature.</p>
+  </section>
+
+  <section id="components">
+    <h2>What's real vs. what's a stand-in</h2>
+    <table>
+      <tr><th>Component</th><th>Status</th><th>Notes</th></tr>
+      <tr><td class="mono">Keycloak realm</td><td>Unmodified</td><td>Same users, same <code>entitlements</code> claim mapper as the original demo</td></tr>
+      <tr><td class="mono">acme-chat</td><td>Unmodified</td><td>Auth-code+PKCE login, Delegation inspector — works unchanged because <code>acme-resource-api</code> echoes headers the same way httpbin did</td></tr>
+      <tr><td class="mono">acme-mcp-server</td><td>Unmodified</td><td>Generic OpenAPI→MCP tool server, reads the OAS spec, replays the bearer verbatim</td></tr>
+      <tr><td class="mono">token-exchange-plugin</td><td><b>New</b></td><td>Replaces Tyk's Enterprise exchange middleware</td></tr>
+      <tr><td class="mono">acme-resource-api</td><td><b>New</b></td><td>Replaces httpbin — verifies + enforces scope itself, since that check no longer happens in Tyk's (Enterprise-only) <code>oauth2.scopeCheck</code> middleware</td></tr>
+    </table>
+  </section>
+
+  <section id="wire">
+    <h2>On the wire</h2>
+    <p>alice logs in → gets an SSO token (<code>scope: customers:all</code>, <code>entitlements: customers:read</code>) → calls <code>issue_refund</code> → the plugin checks <code>refunds:write</code> against her entitlements → denied, 403, before the request reaches the MCP server or the resource API at all. bob has <code>entitlements: customers:read customers:write refunds:write</code> — same call succeeds, and the resource API receives a token with <code>sub</code> = bob, <code>scope: refunds:write</code>, freshly minted by the plugin sixty seconds earlier.</p>
+  </section>
+
+  <section>
+    <div class="finalcta">
+      <h2 style="margin-bottom:10px">That's the whole machine</h2>
+      <p class="lead muted" style="margin:0 auto 22px;text-align:center">Identity in Keycloak, the narrowing in a custom OSS Tyk plugin, enforcement independently re-checked downstream.</p>
+      <a class="cta" href="/" style="font-size:15px;padding:13px 24px">Open the Acme Support Copilot →</a>
+    </div>
+  </section>
+</div>
+</body>
+</html>

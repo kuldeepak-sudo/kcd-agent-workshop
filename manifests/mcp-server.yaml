@@ -1,0 +1,35 @@
+# Deploys the open source tyk-mock-mcp-server into the tyk-oss namespace.
+# Build + load the image first (see lab-guide.md, section 2.3):
+#   git clone https://github.com/TykTechnologies/tyk-mock-mcp-server.git
+#   cd tyk-mock-mcp-server
+#   docker build -t tyk-mock-mcp-server:local .
+#   kind load docker-image tyk-mock-mcp-server:local --name kcd-agent-demo
+#
+# Then: kubectl apply -f manifests/mcp-server.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mock-mcp-server
+  namespace: tyk-oss
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: mock-mcp-server }
+  template:
+    metadata:
+      labels: { app: mock-mcp-server }
+    spec:
+      containers:
+        - name: mock-mcp-server
+          image: tyk-mock-mcp-server:local
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 7878 }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-mcp-server
+  namespace: tyk-oss
+spec:
+  selector: { app: mock-mcp-server }
+  ports: [{ port: 7878, targetPort: 7878 }]

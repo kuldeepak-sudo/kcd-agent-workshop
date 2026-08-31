@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide · Acme Support Copilot (OSS edition)</title>
+<style>
+  :root{
+    --bg:#070b16; --bg2:#0b1120; --panel:#0f1626; --panel2:#141d31; --line:#1f2940;
+    --ink:#eaf0fb; --muted:#8893ad;
+    --teal:#00d6a4; --teal2:#23ecc0; --cyan:#3bc4ff; --coral:#ff5c7a; --amber:#ffc24b; --violet:#9b8cff;
+    --grad:linear-gradient(135deg,#00d6a4,#3bc4ff);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:15px/1.65 ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);
+    background:
+      radial-gradient(1100px 600px at 90% -8%,rgba(59,196,255,.12),transparent 60%),
+      radial-gradient(900px 520px at -8% 30%,rgba(0,214,164,.10),transparent 55%),
+      var(--bg);}
+  a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}
+  code{font-family:ui-monospace,Menlo,monospace;background:var(--bg2);border:1px solid var(--line);
+    padding:1px 6px;border-radius:5px;font-size:.86em;color:var(--teal2)}
+  header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:13px 26px;border-bottom:1px solid var(--line);background:rgba(8,12,22,.78);backdrop-filter:blur(14px)}
+  .brand{display:flex;align-items:center;gap:11px}
+  .logo{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;
+    font-weight:900;color:#04140f;font-size:15px;box-shadow:0 6px 22px rgba(0,214,164,.35)}
+  .brand b{font-size:15px}.brand .sub{color:var(--muted);font-size:11px;margin-left:2px}
+  .cta{display:inline-flex;align-items:center;gap:8px;background:var(--grad);color:#04140f;border:none;
+    border-radius:10px;padding:9px 16px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
+  .cta:hover{transform:translateY(-1px);text-decoration:none}
+  .ghost{border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:8px 13px;font-size:13px}
+  .ghost:hover{border-color:var(--teal);color:var(--teal2);text-decoration:none}
+  .wrap{max-width:880px;margin:0 auto;padding:0 26px 90px}
+  section{padding:36px 0;border-bottom:1px solid rgba(31,41,64,.6)}
+  section:last-child{border-bottom:none}
+  .eyebrow{display:inline-block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);
+    font-weight:800;margin-bottom:12px;padding:4px 11px;border:1px solid rgba(59,196,255,.3);border-radius:999px;background:rgba(59,196,255,.07)}
+  h1{font-size:clamp(26px,4vw,38px);line-height:1.1;letter-spacing:-.5px;margin:0 0 14px;font-weight:850}
+  h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(19px,2.4vw,24px);letter-spacing:-.3px;margin:0 0 8px;font-weight:800}
+  .lead{font-size:16px;color:#c7d2e8;max-width:680px}
+  .muted{color:var(--muted)}p{margin:0 0 12px}
+  ul{margin:8px 0 14px;padding-left:20px}li{margin:6px 0}
+  .step{display:flex;gap:14px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0;
+    background:linear-gradient(180deg,rgba(17,24,41,.6),rgba(12,18,32,.6))}
+  .step .n{flex:0 0 30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;
+    font-weight:900;color:#04140f;font-size:14px}
+  .step h3{margin:0 0 4px;font-size:15px}
+  .step p{margin:0;color:#c7d2e8;font-size:14px}
+  .callout{display:flex;gap:13px;border:1px solid rgba(255,194,75,.3);border-radius:12px;padding:14px 16px;background:rgba(255,194,75,.06);margin:16px 0}
+  .callout .ic{font-size:20px}.callout .note{color:var(--muted);font-size:13.5px}
+  .finalcta{border:1px solid var(--line);border-radius:18px;padding:30px;text-align:center;background:linear-gradient(180deg,rgba(20,29,49,.6),rgba(13,19,33,.6))}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">A</div><div><b>Acme Support Copilot</b><span class="sub"> · guide</span></div></div>
+  <div style="display:flex;gap:8px"><a class="ghost" href="/setup">Technical version</a><a class="cta" href="/">Open the app →</a></div>
+</header>
+
+<div class="wrap">
+  <section>
+    <span class="eyebrow">Plain English</span>
+    <h1>An assistant that acts <span class="g">on your behalf</span> — never as itself</h1>
+    <p class="lead">When you ask this copilot to look something up or issue a refund, it doesn't use its own permissions. It uses a version of <em>your</em> login, narrowed down to exactly the one thing you asked it to do. That narrowing happens automatically, every single time, before the request goes anywhere near the real customer data.</p>
+  </section>
+
+  <section>
+    <h2>What you're about to see</h2>
+    <div class="step">
+      <div class="n">1</div>
+      <div><h3>Sign in as yourself</h3><p>Not as "the bot" — as alice or bob, real support reps with different permissions.</p></div>
+    </div>
+    <div class="step">
+      <div class="n">2</div>
+      <div><h3>Ask for something</h3><p>"Look up customer C-1024" or "issue a $25 refund." The assistant translates this into a tool call.</p></div>
+    </div>
+    <div class="step">
+      <div class="n">3</div>
+      <div><h3>Your permission gets checked — before anything happens</h3><p>If you're not allowed to do the thing you asked for, it stops right there with a clear denial. Nothing downstream ever sees the request.</p></div>
+    </div>
+    <div class="step">
+      <div class="n">4</div>
+      <div><h3>If you are allowed: a fresh, narrow token gets minted</h3><p>Your original login proves who you are broadly. What actually reaches the customer database is a brand-new, short-lived credential that says "this exact person, doing this exact one thing" — nothing more.</p></div>
+    </div>
+    <div class="step">
+      <div class="n">5</div>
+      <div><h3>The Delegation inspector shows you the swap</h3><p>Click a tool call in the chat and you can see both tokens side by side — same identity, narrower permission.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Why this matters</h2>
+    <p>Without this, an AI agent typically gets ONE broad credential and uses it for everything it does, for everyone it does it for. That means:</p>
+    <ul>
+      <li>No way to tell, after the fact, which human actually asked for a given action.</li>
+      <li>No way to give the agent less access for a routine lookup than for a refund.</li>
+      <li>A single leaked agent credential exposes everything the agent can ever do, for every user.</li>
+    </ul>
+    <p>Narrowing the token per-request, per-action, while keeping the human's identity attached, closes all three gaps — and it happens at the infrastructure layer (the gateway), not inside the agent's own code, so no individual agent developer has to remember to implement it correctly.</p>
+    <div class="callout"><div class="ic">🔓</div><div class="note"><b>Open source note:</b> this exact behavior is usually sold as an Enterprise gateway feature. This demo reimplements it with a small custom open source Tyk plugin instead — same outcome, no paid licence required. See the technical version of this guide for exactly how.</div></div>
+  </section>
+
+  <section>
+    <div class="finalcta">
+      <h2 style="margin-bottom:10px">Try it yourself</h2>
+      <p class="lead muted" style="margin:0 auto 22px;text-align:center">Sign in as alice, try a refund (denied), then sign in as bob and try again (approved).</p>
+      <a class="cta" href="/" style="font-size:15px;padding:13px 24px">Open the Acme Support Copilot →</a>
+    </div>
+  </section>
+</div>
+</body>
+</html>

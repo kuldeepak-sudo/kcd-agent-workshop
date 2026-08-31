@@ -1,0 +1,46 @@
+# Generic OpenAPI->MCP tool server (unchanged from tyk-demo's mcp-token-
+# exchange deployment — see services/acme-mcp-server). It reads acme-api.oas.json
+# and exposes one MCP tool per operation, replaying whatever bearer it received
+# (by this point, the plugin-exchanged token) to the resource API via Tyk.
+#
+# The OAS spec is mounted from a ConfigMap — create it before applying this:
+#   kubectl create configmap acme-api-oas -n tyk-oss \
+#     --from-file=acme-api.oas.json=part2-token-exchange/tyk/acme-api.oas.json \
+#     --dry-run=client -o yaml | kubectl apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acme-mcp-server
+  namespace: tyk-oss
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: acme-mcp-server }
+  template:
+    metadata:
+      labels: { app: acme-mcp-server }
+    spec:
+      containers:
+        - name: acme-mcp-server
+          image: acme-mcp-server:local
+          imagePullPolicy: IfNotPresent
+          env:
+            - { name: MCP_OAS_PATH, value: "/etc/acme/acme-api.oas.json" }
+            - { name: UPSTREAM_BASE_URL, value: "http://gateway-svc-tyk-oss-tyk-gateway.tyk-oss.svc.cluster.local:8080" }
+            - { name: UPSTREAM_HOST, value: "api.acme.internal" }
+          ports: [{ containerPort: 7878 }]
+          volumeMounts:
+            - name: oas-spec
+              mountPath: /etc/acme
+      volumes:
+        - name: oas-spec
+          configMap: { name: acme-api-oas }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: acme-mcp-server
+  namespace: tyk-oss
+spec:
+  selector: { app: acme-mcp-server }
+  ports: [{ port: 7878, targetPort: 7878 }]

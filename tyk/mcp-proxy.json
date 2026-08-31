@@ -1,0 +1,68 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "mock-mcp",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/mcp": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    }
+  },
+  "x-tyk-api-gateway": {
+    "info": {
+      "name": "mock-mcp-governed",
+      "state": {
+        "active": true
+      },
+      "id": "bd14dd7bcd764110b0e8bfac22c11a0c"
+    },
+    "server": {
+      "listenPath": {
+        "value": "/mcp-gw/",
+        "strip": true
+      },
+      "authentication": {
+        "enabled": true,
+        "authToken": {
+          "enabled": true
+        }
+      }
+    },
+    "upstream": {
+      "url": "http://mock-mcp-server.tyk-oss.svc.cluster.local:7878"
+    },
+    "middleware": {
+      "mcpTools": {
+        "get_anything": {
+          "allow": {
+            "enabled": true
+          }
+        },
+        "get_users": {
+          "allow": {
+            "enabled": true
+          }
+        },
+        "get_products": {
+          "allow": {
+            "enabled": true
+          }
+        }
+      }
+    }
+  }
+}

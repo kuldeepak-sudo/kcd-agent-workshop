@@ -1,0 +1,187 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "acme-api",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/anything/customers/{customer_id}": {
+      "get": {
+        "operationId": "lookupCustomer",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateCustomer",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "the customer's new email"
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/anything/customers/{customer_id}/orders": {
+      "get": {
+        "operationId": "recentOrders",
+        "parameters": [
+          {
+            "name": "customer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/anything/refunds": {
+      "post": {
+        "operationId": "issueRefund",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer_id": {
+                    "type": "string",
+                    "description": "the customer id to refund"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "description": "the refund amount"
+                  }
+                },
+                "required": [
+                  "customer_id",
+                  "amount"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "pluginJwt": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "pluginJwt": []
+    }
+  ],
+  "x-tyk-api-gateway": {
+    "info": {
+      "name": "acme-api",
+      "state": {
+        "active": true
+      },
+      "id": "7cec799338bb41b58627cb21ab047640"
+    },
+    "upstream": {
+      "url": "http://acme-resource-api.tyk-oss.svc.cluster.local:8181"
+    },
+    "middleware": {
+      "global": {
+        "trafficLogs": {
+          "enabled": true
+        }
+      }
+    },
+    "server": {
+      "listenPath": {
+        "value": "/",
+        "strip": false
+      },
+      "customDomain": {
+        "enabled": true,
+        "name": "api.acme.internal"
+      },
+      "authentication": {
+        "enabled": true,
+        "baseIdentityProvider": "jwt_claim",
+        "securitySchemes": {
+          "pluginJwt": {
+            "enabled": true,
+            "header": {
+              "enabled": true,
+              "name": "Authorization"
+            },
+            "jwksURIs": [
+              {
+                "url": "http://acme-token-exchange-plugin.tyk-oss.svc.cluster.local:8081/.well-known/jwks.json",
+                "cacheTimeout": "0s"
+              }
+            ],
+            "signingMethod": "rsa",
+            "identityBaseField": "sub",
+            "defaultPolicies": [
+              "acme-demo-default"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

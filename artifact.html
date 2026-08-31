@@ -1,0 +1,695 @@
+<title>Deploy An Agent, Then Govern It</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#f6f7f5;
+  --surface:#ffffff;
+  --surface-alt:#eef1ee;
+  --text:#16211c;
+  --text-muted:#4b5a52;
+  --border:#d8ded9;
+  --accent:#0f7a6c;
+  --accent-strong:#0b5c52;
+  --accent-soft:#e3f2ee;
+  --warn:#a8551f;
+  --warn-soft:#fbeee2;
+  --code-bg:#0e1613;
+  --code-text:#d9ece5;
+  --code-muted:#7fa393;
+  --shadow: 0 1px 2px rgba(20,30,25,0.06), 0 8px 24px rgba(20,30,25,0.05);
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0f0d;
+    --surface:#121815;
+    --surface-alt:#182019;
+    --text:#e7f0ea;
+    --text-muted:#9db3a8;
+    --border:#243129;
+    --accent:#3ecdb2;
+    --accent-strong:#7fe6d1;
+    --accent-soft:#132621;
+    --warn:#e2a15c;
+    --warn-soft:#2a1f14;
+    --code-bg:#070b09;
+    --code-text:#cfe8dd;
+    --code-muted:#6f9384;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0f0d;
+  --surface:#121815;
+  --surface-alt:#182019;
+  --text:#e7f0ea;
+  --text-muted:#9db3a8;
+  --border:#243129;
+  --accent:#3ecdb2;
+  --accent-strong:#7fe6d1;
+  --accent-soft:#132621;
+  --warn:#e2a15c;
+  --warn-soft:#2a1f14;
+  --code-bg:#070b09;
+  --code-text:#cfe8dd;
+  --code-muted:#6f9384;
+  --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35);
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+.mono{ font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+.page{
+  max-width:820px;
+  margin:0 auto;
+  padding:2.5rem 1.5rem 6rem;
+}
+
+/* ---- Header / spec sheet ---- */
+.masthead{
+  display:flex;
+  flex-direction:column;
+  gap:1.1rem;
+  padding-bottom:2rem;
+  border-bottom:1px solid var(--border);
+  margin-bottom:2.2rem;
+}
+.eyebrow{
+  font-family:"IBM Plex Mono", monospace;
+  font-size:0.72rem;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--accent-strong);
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+}
+.eyebrow::before{
+  content:"";
+  width:7px; height:7px;
+  border-radius:50%;
+  background:var(--accent);
+  display:inline-block;
+}
+h1.title{
+  font-size:clamp(1.8rem, 4vw, 2.5rem);
+  line-height:1.15;
+  margin:0;
+  font-weight:700;
+  text-wrap:balance;
+  letter-spacing:-0.01em;
+}
+.subtitle{
+  color:var(--text-muted);
+  font-size:1.05rem;
+  max-width:56ch;
+  margin:0;
+}
+.spec-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:0.9rem;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:1rem 1.2rem;
+  box-shadow:var(--shadow);
+}
+.spec-item dt{
+  font-family:"IBM Plex Mono", monospace;
+  font-size:0.68rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--text-muted);
+  margin:0 0 0.25rem;
+}
+.spec-item dd{
+  margin:0;
+  font-size:0.92rem;
+  font-weight:500;
+}
+
+/* ---- Verify / read-first banner ---- */
+.callout{
+  border-radius:8px;
+  padding:1rem 1.2rem;
+  margin:1.6rem 0;
+  border-left:3px solid var(--warn);
+  background:var(--warn-soft);
+  font-size:0.95rem;
+}
+.callout strong{ color:var(--warn); }
+.callout.talk{
+  border-left-color:var(--accent);
+  background:var(--accent-soft);
+}
+.callout.talk strong{ color:var(--accent-strong); }
+.callout.ok{
+  border-left-color:var(--accent);
+  background:var(--accent-soft);
+}
+.callout.ok strong{ color:var(--accent-strong); }
+
+/* ---- TOC ---- */
+.toc{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:1.1rem 1.3rem;
+  margin:2rem 0 2.6rem;
+  box-shadow:var(--shadow);
+}
+.toc-title{
+  font-family:"IBM Plex Mono", monospace;
+  font-size:0.72rem;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--text-muted);
+  margin:0 0 0.7rem;
+}
+.toc ol{
+  columns:2;
+  column-gap:2rem;
+  margin:0; padding:0;
+  list-style:none;
+  counter-reset:toc;
+}
+.toc li{
+  counter-increment:toc;
+  break-inside:avoid;
+  margin-bottom:0.45rem;
+  font-size:0.88rem;
+}
+.toc a{
+  color:var(--text);
+  text-decoration:none;
+  border-bottom:1px solid transparent;
+}
+.toc a:hover{ border-bottom-color:var(--accent); }
+.toc li::before{
+  content:counter(toc, decimal-leading-zero) "  ";
+  font-family:"IBM Plex Mono", monospace;
+  color:var(--accent);
+  font-size:0.8rem;
+}
+
+/* ---- Sections ---- */
+section{ margin:2.6rem 0; }
+.sec-eyebrow{
+  font-family:"IBM Plex Mono", monospace;
+  font-size:0.7rem;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--accent-strong);
+  margin-bottom:0.4rem;
+}
+h2{
+  font-size:1.45rem;
+  margin:0 0 0.9rem;
+  text-wrap:balance;
+  border-bottom:1px solid var(--border);
+  padding-bottom:0.6rem;
+}
+h3{
+  font-size:1.1rem;
+  margin:1.6rem 0 0.7rem;
+}
+p{ margin:0.8rem 0; max-width:70ch; }
+ul, ol.plain{ padding-left:1.3rem; }
+li{ margin:0.35rem 0; }
+a{ color:var(--accent-strong); }
+
+/* ---- Diagram card ---- */
+.diagram-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1.3rem;
+  box-shadow:var(--shadow);
+  overflow-x:auto;
+  margin:1.2rem 0 1.6rem;
+}
+.diagram-card figcaption{
+  font-size:0.82rem;
+  color:var(--text-muted);
+  margin-top:0.6rem;
+  text-align:center;
+}
+
+/* ---- Code blocks ---- */
+.term{
+  background:var(--code-bg);
+  color:var(--code-text);
+  border-radius:10px;
+  overflow:hidden;
+  margin:1rem 0 1.4rem;
+  box-shadow:var(--shadow);
+}
+.term-bar{
+  display:flex;
+  gap:6px;
+  padding:0.6rem 0.8rem;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.term-bar span{
+  width:9px; height:9px; border-radius:50%;
+  background:rgba(255,255,255,0.18);
+}
+.term pre{
+  margin:0;
+  padding:1rem 1.2rem 1.2rem;
+  overflow-x:auto;
+  font-family:"IBM Plex Mono", monospace;
+  font-size:0.83rem;
+  line-height:1.6;
+}
+.term .cmt{ color:var(--code-muted); }
+code.inline{
+  font-family:"IBM Plex Mono", monospace;
+  background:var(--surface-alt);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:0.1em 0.35em;
+  font-size:0.88em;
+}
+
+/* ---- Tables ---- */
+.table-wrap{ overflow-x:auto; margin:1.1rem 0 1.6rem; }
+table{
+  border-collapse:collapse;
+  width:100%;
+  font-size:0.88rem;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+}
+th, td{
+  text-align:left;
+  padding:0.65rem 0.9rem;
+  border-bottom:1px solid var(--border);
+  vertical-align:top;
+}
+th{
+  font-family:"IBM Plex Mono", monospace;
+  font-size:0.72rem;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--text-muted);
+  background:var(--surface-alt);
+}
+tr:last-child td{ border-bottom:none; }
+td.num, th.num{ font-variant-numeric:tabular-nums; }
+
+footer{
+  margin-top:3.5rem;
+  padding-top:1.6rem;
+  border-top:1px solid var(--border);
+  font-size:0.85rem;
+  color:var(--text-muted);
+}
+footer ul{ padding-left:1.2rem; }
+footer a{ color:var(--text-muted); }
+
+@media (max-width:600px){
+  .toc ol{ columns:1; }
+}
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="eyebrow">KCD workshop guide</div>
+    <h1 class="title">Deploy an Agent, Then Govern It</h1>
+    <p class="subtitle">Open source agents on Kubernetes — MCP server, Tyk OSS Gateway, Tyk AI Studio, and a custom gRPC plugin for identity governance — with governance made visible, not theoretical. Tyk OSS only, no Dashboard, no Enterprise licence.</p>
+    <dl class="spec-grid">
+      <div class="spec-item"><dt>Format</dt><dd>45–60 min live demo, two parts</dd></div>
+      <div class="spec-item"><dt>Audience</dt><dd>Kubernetes-literate, no AI background needed</dd></div>
+      <div class="spec-item"><dt>Cluster</dt><dd>kind (local, single node)</dd></div>
+      <div class="spec-item"><dt>Stack</dt><dd>MCP server · Tyk OSS · AI Studio CE · Keycloak</dd></div>
+    </dl>
+  </header>
+
+  <div class="callout ok">
+    <strong>Verified live (2026-08-30), not just written from docs.</strong> This guide was built and exercised against a real kind cluster and a real AI Studio deployment. Part 2's token-exchange flow works end-to-end. Two real bugs in the original MCP setup were found and fixed. Two things are flagged as genuinely unresolved rather than glossed over — the MCP tool-allowlist/rate-limit not enforcing, and AI Studio's live completions call — both called out at the point they matter, with an honest fallback line for the stage.
+  </div>
+
+  <nav class="toc">
+    <p class="toc-title">On this page</p>
+    <ol>
+      <li><a href="#architecture">What you're building</a></li>
+      <li><a href="#preflight">Pre-flight checklist</a></li>
+      <li><a href="#seg1">Segment 1 — the problem</a></li>
+      <li><a href="#seg2">Segment 2 — governed tool path</a></li>
+      <li><a href="#seg3">Segment 3 — governed model path</a></li>
+      <li><a href="#seg4">Segment 4 — run it, break it</a></li>
+      <li><a href="#part2">Part 2 — identity governance</a></li>
+      <li><a href="#fallback">Fallback: offline / no API key</a></li>
+      <li><a href="#cleanup">Cleanup</a></li>
+      <li><a href="#troubleshooting">Troubleshooting</a></li>
+      <li><a href="#closing">The "why not build this in?" answer</a></li>
+    </ol>
+  </nav>
+
+  <section id="architecture">
+    <p class="sec-eyebrow">01 · Architecture</p>
+    <h2>What you're building</h2>
+    <p>Three governance stories, all fronted by open source Tyk components. The agent never talks to the LLM, the MCP server, or a customer-data API directly — every call is intercepted by an open source Tyk component that can authenticate it, rate-limit it, filter what it's allowed to see, narrow its identity, and log it.</p>
+
+    <figure class="diagram-card">
+      <pre class="mermaid">
+flowchart LR
+    subgraph agent["Your agent (agent.py)"]
+        A[Minimal Python agent loop]
+    end
+
+    subgraph gov["Governance layer — Tyk (open source)"]
+        AIS["Tyk AI Studio CE
+AI Gateway
+rate limits · cost tracking · RBAC"]
+        TG["Tyk OSS Gateway
+MCP Gateway
+auth · per-tool quotas · filtered discovery · audit log"]
+    end
+
+    subgraph backend["Backend services (open source)"]
+        LLM[("LLM provider
+OpenAI / Anthropic / Ollama")]
+        MCP["tyk-mock-mcp-server
+open source MCP server
+15 tools, no auth of its own"]
+    end
+
+    A -- "1. chat completion" --> AIS
+    AIS -- "2. proxied model call" --> LLM
+    A -- "3. tools/call (JSON-RPC)" --> TG
+    TG -- "4. only allowed tools reach here" --> MCP
+      </pre>
+      <figcaption>Part 1 (this diagram): LLM + tool governance. Part 2 adds a third pillar — identity — narrowing an agent's access to exactly the one action a signed-in human asked for, via a custom Tyk OSS gRPC plugin.</figcaption>
+    </figure>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Component</th><th>What it governs</th><th>License</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Tool calls (MCP)</td>
+            <td>Tyk OSS Gateway — MCP Gateway feature</td>
+            <td>Auth, per-agent/per-tool rate limits &amp; quotas, filtered tool discovery, structured access logs</td>
+            <td>Fully in the OSS gateway (MPL)</td>
+          </tr>
+          <tr>
+            <td>Model calls (LLM)</td>
+            <td>Tyk AI Studio — Community Edition</td>
+            <td>Auth, rate limiting, cost/usage tracking, RBAC on who can call which model</td>
+            <td>Open source (CE)</td>
+          </tr>
+          <tr>
+            <td>Identity (Part 2)</td>
+            <td>Custom Tyk OSS gRPC plugin</td>
+            <td>Narrows an inbound token's scope to one action while preserving the caller's identity — RFC 8693-style, without the Enterprise licence that feature normally needs</td>
+            <td>Fully OSS (hand-rolled on the OSS "rich plugins" feature)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Full audit-log <em>persistence</em> and budget <em>enforcement</em> on the AI Studio side are Enterprise-only — say so on stage rather than promising it, and lean on the MCP Gateway's access logs for the audit-trail beat instead.</p>
+  </section>
+
+  <section id="preflight">
+    <p class="sec-eyebrow">02 · Before you go on stage</p>
+    <h2>Pre-flight checklist</h2>
+    <p>A live install of four-plus components from a cold cluster eats your whole slot. Do the heavy lifting ahead of time — the live portion re-runs the fast, visible parts and spends its time on the governance payoff. Everything below is scripted now; nothing here needs a manual Helm value hunt.</p>
+
+    <h3>Tooling on your laptop</h3>
+    <ul>
+      <li>Docker Desktop (or equivalent) with at least 6 GB RAM allocated</li>
+      <li><a href="https://kind.sigs.k8s.io/" target="_blank" rel="noopener">kind</a> or k3d — this guide uses kind</li>
+      <li><code class="inline">kubectl</code>, <code class="inline">helm</code> 3+, Python 3.10+ — no <code class="inline">jq</code>, no Go needed to just run this</li>
+      <li>An API key for one LLM provider (OpenAI or Anthropic) — optional; no key? Skip to the Ollama fallback</li>
+    </ul>
+
+    <h3>Part 1 — cluster, Redis, gateway, mock MCP server</h3>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>./setup.sh</pre></div>
+    <p>One command: creates the kind cluster, clones and builds <code class="inline">tyk-mock-mcp-server</code> (no published image — you build it; a good live-demo beat in its own right, "here's a plain, boring, open source MCP server, no auth of its own, on purpose"), deploys Redis and the Tyk OSS Gateway with the correct pinned versions, registers the governed MCP proxy, and creates a demo API key written to <code class="inline">/tmp/tyk_mcp_key.txt</code>.</p>
+
+    <h3>Part 2 — identity governance stack</h3>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>cd part2-token-exchange
+./setup.sh
+./verify.sh   <span class="cmt"># should print three PASS lines</span></pre></div>
+
+    <h3>Tyk AI Studio (Community Edition)</h3>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>cd ai-studio
+ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" ./setup.sh   <span class="cmt"># or OPENAI_API_KEY, or omit and add a key via the UI later</span></pre></div>
+    <p><strong>Verified (2026-08-30):</strong> no Kubernetes chart for AI Studio CE was found working as of this build — this script instead automates the officially-documented Docker Compose CE quickstart end to end: clone, fix a real port-mismatch bug in the project's own shipped config (its microgateway container otherwise crash-loops forever on "connection refused"), bring the stack up, register the first admin account (there is no <code class="inline">ADMIN_EMAIL</code> env var — the first account to register becomes admin, full stop), and create a demo LLM entry, app, and activated API credential via the admin API.</p>
+    <p>The UI is confirmed on <strong><code class="inline">http://localhost:3000</code></strong> — not 8585, that's the Enterprise edition; the project's two quickstart docs disagree with each other on this.</p>
+    <div class="callout">
+      <strong>⚠ Not yet resolved:</strong> the admin/LLM/app/credential setup above is fully confirmed working. The actual live chat-completions call through AI Studio's microgateway (port 9091) is not — the shipped image predates the project's current documentation, and the microgateway ("edge") process never actually loads the config this script creates: its logs repeat "Edge is out of sync with control" every ~30s, permanently, with the loaded config snapshot never advancing past container start across 5+ minutes of retries or a full restart. Rehearse the actual call yourself before demo day — see <code class="inline">ai-studio/setup.sh</code>'s own final output for the exact curl to test.
+    </div>
+
+    <h3>Pick your rate-limit numbers ahead of time</h3>
+    <p>Decide now what "trip the rate limit live" looks like — e.g. 5 requests/minute on one tool — so you're not doing arithmetic on stage. <strong>See the segment 4 callout: in this build's live testing, the rate limit did not actually trip</strong> — verify against your own gateway build before relying on this beat.</p>
+
+    <div class="callout talk"><strong>Checkpoint:</strong> both setup scripts run clean, <code class="inline">verify.sh</code> prints all PASS, AI Studio's admin console is reachable, one working LLM API key in hand (if you're attempting segment 3 live). Everything below can now run live in the allotted time.</div>
+  </section>
+
+  <section id="seg1">
+    <p class="sec-eyebrow">03 · Live, ~5 min</p>
+    <h2>Segment 1 — the problem, in one slide</h2>
+    <p>No terminal yet. State the problem plainly:</p>
+    <ul>
+      <li>Agents call tools (via MCP) and models (via an LLM API) directly, with no shared policy layer.</li>
+      <li>Every framework reinvents its own auth, rate limiting, and logging — or skips it.</li>
+      <li>"Governance" usually means a wiki page nobody reads, applied after an incident.</li>
+    </ul>
+    <p>Show the architecture diagram above. State the thesis: <em>put an open source gateway in front of every path, and governance becomes infrastructure instead of a policy document.</em></p>
+  </section>
+
+  <section id="seg2">
+    <p class="sec-eyebrow">04 · Live, ~12 min</p>
+    <h2>Segment 2 — stand up the governed tool path</h2>
+    <p>Talking point while pods come up: this is a completely ordinary API gateway deployment — nothing agent-specific yet, on purpose. The same gateway your platform team already runs for REST APIs is what's about to govern your agent.</p>
+
+    <div class="callout"><strong>Verified, a real fix:</strong> the exact pinned Bitnami Redis tag 404s from <code class="inline">docker.io/bitnami/redis</code> — Bitnami/Broadcom moved older free-tier tags to <code class="inline">docker.io/bitnamilegacy/*</code> in 2025. <code class="inline">setup.sh</code> already points at the legacy registry; if a pod is still stuck on the old image, <code class="inline">kubectl delete pod</code> it — StatefulSet pods don't always pick up an image change from a bare <code class="inline">helm upgrade</code>.</div>
+
+    <div class="callout"><strong>Verified:</strong> MCP Gateway needs Tyk Gateway <strong>5.13+</strong>, and the full feature set (rate limiting, per-consumer RBAC, filtered discovery, allowlisting) ships in the OSS gateway per the product page — only upstream OAuth2 client-credentials auth and the control-plane management layer are Enterprise. <code class="inline">setup.sh</code> pins <code class="inline">v5.13.2</code> explicitly.</div>
+
+    <h3>Talking point: the (deliberately unguarded) MCP server</h3>
+    <p><code class="inline">curl</code> it from inside the cluster and show it just answers — no API key, no rate limit, no audit trail. That gap is exactly what the governed proxy closes.</p>
+
+    <h3>The governed MCP proxy — what actually got registered</h3>
+    <p>Tyk models every remote MCP server as a Tyk OAS API definition. <strong>Verified against <code class="inline">tyk-mock-mcp-server</code>'s real tool list and the current schema</strong> — the tool allowlist lives at <code class="inline">middleware.mcpTools.{toolName}.allow.enabled</code> (per tool, not a single array). The server actually exposes 15 tools (<code class="inline">get_users</code>, <code class="inline">create_user</code>, <code class="inline">update_user</code>, <code class="inline">delete_user</code>, <code class="inline">get_posts</code>, <code class="inline">create_post</code>, <code class="inline">get_products</code>, <code class="inline">process_order</code>, <code class="inline">get_analytics</code>, <code class="inline">generate_report</code>, <code class="inline">validate_email</code>, <code class="inline">generate_uuid</code>, <code class="inline">format_date</code>, <code class="inline">get_anything</code>, <code class="inline">slow_response</code>) — there is no <code class="inline">list_users</code> or <code class="inline">get_user</code>.</p>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>{
+  "openapi": "3.0.3",
+  "info": { "title": "mock-mcp", "version": "1.0.0" },
+  "paths": { "/mcp": { "post": { "responses": {"200": {"description": "ok"}} }, "get": { "responses": {"200": {"description": "ok"}} } } },
+  "x-tyk-api-gateway": {
+    "info": { "name": "mock-mcp-governed", "state": { "active": true } },
+    "server": {
+      "listenPath": { "value": "/mcp-gw/", "strip": true },
+      "authentication": { "enabled": true, "authToken": { "enabled": true } }
+    },
+    "upstream": { "url": "http://mock-mcp-server.tyk-oss.svc.cluster.local:7878" },
+    "middleware": {
+      "mcpTools": {
+        "get_anything": { "allow": { "enabled": true } },
+        "get_users": { "allow": { "enabled": true } },
+        "get_products": { "allow": { "enabled": true } }
+      }
+    }
+  }
+}</pre></div>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>curl -s http://localhost:8080/tyk/mcps \
+  -H "x-tyk-authorization: $APISecret" -H "Content-Type: application/json" \
+  -d @mcp-proxy.json</pre></div>
+    <div class="callout"><strong>⚠ Verified — the single most important finding in this whole guide.</strong> That's <code class="inline">POST /tyk/mcps</code>, <strong>not</strong> <code class="inline">/tyk/apis/oas</code>. Registering through the generic OAS endpoint creates a perfectly working reverse proxy — MCP traffic flows fine either way — but it never sets <code class="inline">ApplicationProtocol="mcp"</code>, and the gateway's <code class="inline">IsMCP()</code> check staying false silently disables <strong>both</strong> the tool-allowlist and per-tool rate limiting (found by reading the gateway's own Go source). Nothing errors — the governance features just never engage. <code class="inline">/tyk/mcps</code> is the dedicated endpoint that actually turns them on. <code class="inline">setup.sh</code> already uses the correct one.</div>
+    <p><code class="inline">setup.sh</code> already registered this and created a demo key for you (<code class="inline">/tmp/tyk_mcp_key.txt</code>). Show one authenticated <code class="inline">tools/list</code> call succeeding through <code class="inline">localhost:8080/mcp-gw/mcp</code>, and one unauthenticated call to the same path failing — the whole pitch, in two curl commands.</p>
+
+    <div class="callout"><strong>Verified, a real gotcha:</strong> <code class="inline">tyk-mock-mcp-server</code> registers its handler at the exact path <code class="inline">/mcp</code> (no trailing slash, exact match, no subtree routing). If your <code class="inline">listenPath</code> is also <code class="inline">/mcp/</code> and clients call <code class="inline">.../mcp/</code>, the stripped remainder is empty and every call 404s from the <em>upstream</em> server (a plain-text 404, not Tyk's JSON error shape — that's the tell). Use a <strong>different</strong> listenPath prefix (<code class="inline">/mcp-gw/</code>) so the client's URL (<code class="inline">.../mcp-gw/mcp</code>) leaves <code class="inline">mcp</code> as the stripped remainder Tyk forwards upstream. Already fixed in this repo's <code class="inline">tyk/mcp-proxy.json</code>.</div>
+  </section>
+
+  <section id="seg3">
+    <p class="sec-eyebrow">05 · Live, ~10 min</p>
+    <h2>Segment 3 — stand up the governed model path</h2>
+
+    <h3>AI Studio is already up from pre-flight</h3>
+    <p>This runs on the host via Docker Compose, not in the kind cluster — say so plainly: "in production this runs as pods like everything else — for the demo I'm keeping the LLM control plane on the host so a network hiccup doesn't take down the whole talk." No Kubernetes chart for CE is confirmed working as of this build.</p>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>open http://localhost:3000   <span class="cmt"># sign in: admin@kcd-workshop.local / Workshop-Demo-2026!</span></pre></div>
+
+    <h3>Show the provider setup</h3>
+    <p><code class="inline">ai-studio/setup.sh</code> already created a <code class="inline">workshop-llm</code> entry, a <code class="inline">workshop-agent</code> app with access to it, and an activated API credential — all confirmed live against the admin API. Walk through the UI: the LLM entry, the app, and (once real traffic flows) the cost/usage panel.</p>
+
+    <h3>Talking point — and the one honest gap</h3>
+    <p>Same shape as segment 2: an ordinary LLM call now goes through a gateway that can enforce who's allowed to call which model, track cost per caller, and — on the Enterprise tier — enforce hard budgets. Community Edition gives you the admin/RBAC/cost-tracking model; that's already most of what a KCD audience needs to see.</p>
+    <p><strong>Verified:</strong> <code class="inline">workshop-agent</code>'s <code class="inline">llm_ids</code> is a genuine, live-testable RBAC control at the control-plane API (port 3000) — PATCH it to include every configured LLM and the app can call any of them; PATCH it down to one and it can't touch the others. Confirmed by reading the app back after each PATCH, and independent of the completions-call bug below since it's enforced entirely within the admin API/UI. See <code class="inline">CHEATSHEET.md</code> §2 for the exact commands — "unguarded" then "simple RBAC" as two live steps.</p>
+    <div class="callout"><strong>⚠ Rehearse the live call before you're on stage — the one piece of the whole workshop that isn't confirmed working.</strong> The microgateway's edge process never actually loads the LLM/app/credential AI Studio just created — logs repeat "Edge is out of sync with control" every ~30s, permanently. If you get it working before your talk, show it. If not: "the governance model — auth, RBAC, cost tracking — is real and running; here's the admin console proving it. The specific completions call has a wrinkle I'm still chasing with the project." That's a stronger talk than a silently botched live demo.</div>
+  </section>
+
+  <section id="seg4">
+    <p class="sec-eyebrow">06 · Live, ~15 min</p>
+    <h2>Segment 4 — run the agent, then break it on purpose</h2>
+
+    <h3>Install and configure</h3>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>python3 --version   <span class="cmt"># needs 3.10+ — agent.py uses `dict | None` (PEP 604) syntax</span>
+python3 -m venv .venv && source .venv/bin/activate   <span class="cmt"># sidesteps macOS's "externally-managed-environment" pip error</span>
+pip install -r requirements.txt
+export TYK_MCP_URL="http://localhost:8080/mcp-gw/mcp"
+export TYK_MCP_KEY="$(cat /tmp/tyk_mcp_key.txt)"   <span class="cmt"># written by ./setup.sh</span></pre></div>
+    <div class="callout"><strong>Verified, two real onboarding gotchas:</strong> macOS's built-in <code class="inline">python3</code> is often older than 3.10 — check the version before assuming a <code class="inline">pip install</code> failure is something else. And Homebrew's Python refuses a bare <code class="inline">pip install</code> with "externally-managed-environment" (PEP 668) — a venv (above) is the clean fix.</div>
+    <p><code class="inline">agent.py</code> genuinely supports two modes now (this used to be a documentation claim that didn't match the code — fixed): with all three <code class="inline">AI_STUDIO_*</code> vars set, it runs the full LLM+tools loop; with any missing, it discovers tools and calls one directly with no LLM in the loop, so the tool-governance path still demos cleanly even with segment 3's AI Studio caveat in play. If you do have the completions call working:</p>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>export AI_STUDIO_BASE_URL="http://localhost:9091/llm/call/workshop-llm/v1"
+export AI_STUDIO_API_KEY="$(cat /tmp/ai_studio_key.txt)"   <span class="cmt"># written by ai-studio/setup.sh</span>
+export AI_STUDIO_MODEL="claude-3-5-haiku-20241022"   <span class="cmt"># bare model name — the slug is already in the base URL</span></pre></div>
+
+    <h3>Run it</h3>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>python agent.py "How many users are in the system, and who is user 1?"</pre></div>
+    <p>Walk through what happens on screen: the model decides it needs a tool, the script calls <code class="inline">tools/call</code> against the Tyk MCP Gateway (not the raw MCP server), gets a result, and the model uses it to answer. Point at the terminal, not the slide, for this part.</p>
+
+    <div class="callout"><strong>Verified:</strong> the streamable-HTTP MCP transport requires a real session handshake first (<code class="inline">initialize</code> → capture <code class="inline">Mcp-Session-Id</code> → <code class="inline">notifications/initialized</code> → <em>then</em> <code class="inline">tools/call</code> works). A bare <code class="inline">tools/call</code> with no handshake returns <code class="inline">200</code> with an "invalid during session initialization" error. <code class="inline">agent.py</code>'s <code class="inline">McpSession</code> class does this for you now.</div>
+
+    <h3>Governance beat #1 — filtered discovery</h3>
+    <p>Create a second key scoped to fewer tools (or none). Re-run <code class="inline">tools/list</code> with it and show the tool list is shorter — the agent literally cannot see tools it isn't authorized for.</p>
+    <div class="callout"><strong>Verified, a real nuance:</strong> the tool allowlist is scoped to the <strong>API definition</strong>, not the key — every key on <code class="inline">mock-mcp-governed</code> sees the same allowed set. Calling a disallowed tool is genuinely denied (a real 403, confirmed live), but narrowing what one specific key can <em>see</em> in <code class="inline">tools/list</code> needs a second, more-restrictive MCP proxy API definition, with the narrower key's <code class="inline">access_rights</code> pointing at that instead. A few minutes of prep, not a code change.</div>
+
+    <h3>Governance beat #2 — trip the rate limit</h3>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre><span class="cmt"># Real MCP session handshake first — capture Mcp-Session-Id from initialize,</span>
+<span class="cmt"># then send it on every later call.</span>
+SID=$(curl -s -D - http://localhost:8080/mcp-gw/mcp \
+  -H "Authorization: Bearer $TYK_MCP_KEY" -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"demo","version":"1.0"}}}' \
+  -o /dev/null | grep -i Mcp-Session-Id | tr -d '\r' | awk '{print $2}')
+curl -s http://localhost:8080/mcp-gw/mcp -H "Authorization: Bearer $TYK_MCP_KEY" \
+  -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -H "Mcp-Session-Id: $SID" \
+  -d '{"jsonrpc":"2.0","method":"notifications/initialized"}' >/dev/null
+
+for i in $(seq 1 8); do
+  curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/mcp-gw/mcp \
+    -H "Authorization: Bearer $TYK_MCP_KEY" \
+    -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -H "Mcp-Session-Id: $SID" \
+    -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_anything","arguments":{}}}'
+done</pre></div>
+    <p><code class="inline">TYK_MCP_KEY</code> fresh off <code class="inline">setup.sh</code> has <strong>no rate limit yet</strong> — this loop is a deliberate "happy path" that returns eight 200s. Apply a 5/min limit on <code class="inline">get_anything</code> live with a <code class="inline">PUT /tyk/keys/{key}</code> (exact command in <code class="inline">CHEATSHEET.md</code> §1b), re-run the same loop, and requests 6–8 come back 429: confirmed live, five 200s then three 429s, exactly as expected. Then remove it again (§1c) and show it's back to all 200. Point out the live Tyk logs showing the calling key's identity attached to the "Rate Limit Exceeded" line: that's the audit trail, for free, from infrastructure the agent code never had to implement.</p>
+    <div class="callout"><strong>⚠ Verified — the fix that made both beats above work at all.</strong> Neither enforced anything the first time this was tried. The cause, found by reading the gateway's own Go source: <code class="inline">mock-mcp-governed</code> must be registered via <code class="inline">POST /tyk/mcps</code>, not <code class="inline">/tyk/apis/oas</code> (see segment 2) — only that endpoint sets <code class="inline">ApplicationProtocol="mcp"</code>, which turns on both the allowlist and rate-limit enforcement. Separately, the rate limit itself lives on the <strong>key</strong> (<code class="inline">access_rights.&lt;api_id&gt;.mcp_primitives</code>), not the API definition.</div>
+    <div class="callout"><strong>Also verified:</strong> <code class="inline">setup.sh</code> creates <code class="inline">TYK_MCP_KEY</code> with a <strong>fixed, custom key ID</strong> (<code class="inline">POST /tyk/keys/{custom-id}</code> instead of the default <code class="inline">POST /tyk/keys/create</code>), so the resulting key value is deterministic — re-running <code class="inline">setup.sh</code> always reproduces byte-for-byte the same key. This closes a real bug found while testing: the default random-key behavior means exporting the key once, then re-running <code class="inline">setup.sh</code> later, silently leaves your shell holding a dead value.</div>
+
+    <h3>Governance beat #3 — the cost/usage view</h3>
+    <p>Flip back to the AI Studio UI and show the usage/cost panel ticking up as <code class="inline">agent.py</code> made its model calls. Say explicitly which parts are CE (the tracking you're looking at) vs. Enterprise (budget alerts/enforcement, full audit-log persistence, SSO) so you don't overclaim live.</p>
+  </section>
+
+  <section id="part2">
+    <p class="sec-eyebrow">07 · Live, ~15 min</p>
+    <h2>Part 2 — identity governance: OAuth 2.0 token exchange, on Tyk OSS only</h2>
+    <p><strong>Runs in <code class="inline">part2-token-exchange/</code>, on the same kind cluster and Tyk OSS Gateway as segments 2–4</strong> — an additional governance pillar layered on top, not a separate stack. Where segments 2–4 showed "auth, rate limits, tool allowlisting" and "LLM cost/RBAC," this shows a third: <strong>identity delegation</strong> — an agent acting <em>on behalf of</em> a specific signed-in human, its access narrowed to exactly the one action it's performing, while the human's identity is preserved end to end.</p>
+
+    <h3>Why this needed its own approach</h3>
+    <p>The scenario (Acme Support Copilot) comes from Tyk's <code class="inline">tyk-demo</code> repo's <code class="inline">mcp-token-exchange</code> deployment, which demonstrates RFC 8693 OAuth Token Exchange using Tyk's built-in <strong>Enterprise</strong> middleware — a hard licence requirement, confirmed by that deployment's own <code class="inline">pre.sh</code>, and a silent no-op on the OSS gateway.</p>
+    <p>To keep this workshop genuinely all-OSS, this reimplements the same <em>observable behaviour</em> — narrow an inbound token's scope to one action while preserving identity — using Tyk's gRPC "rich plugin" system, which has shipped in the Community Edition gateway for years, independent of and predating the Enterprise MCP-exchange bundle. A small Python gRPC service reads the already-JWT-authenticated request, checks the caller's <code class="inline">entitlements</code> claim against the one scope the requested tool needs, and either denies with 403 or mints a fresh, short-lived, self-signed JWT that keeps <code class="inline">sub</code> but re-points <code class="inline">aud</code>/<code class="inline">scope</code>.</p>
+    <div class="callout ok"><strong>Verified end-to-end against a live kind cluster</strong> — real Keycloak login, real Tyk OSS Gateway, real gRPC plugin, real narrowed-token verification at a second Tyk-fronted API.</div>
+
+    <h3>What gets deployed</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Component</th><th>Role</th><th>OSS?</th></tr></thead>
+        <tbody>
+          <tr><td>Keycloak 26</td><td>Identity provider — realm with alice/bob, <code class="inline">entitlements</code> claim</td><td>Yes (Apache-2.0)</td></tr>
+          <tr><td><code class="inline">acme-token-exchange-plugin</code></td><td>Custom Tyk gRPC coprocess plugin — the scope-narrowing logic</td><td>Yes (custom code, OSS Tyk APIs only)</td></tr>
+          <tr><td><code class="inline">acme-mcp-server</code></td><td>Generic OpenAPI→MCP tool server (ported unchanged from <code class="inline">tyk-demo</code>)</td><td>Yes</td></tr>
+          <tr><td><code class="inline">acme-resource-api</code></td><td>Stand-in "downstream API" — independently verifies the narrowed token and enforces scope per operation</td><td>Yes (custom code)</td></tr>
+          <tr><td><code class="inline">acme-chat</code></td><td>Browser copilot UI with a "Delegation inspector" (ported unchanged)</td><td>Yes</td></tr>
+          <tr><td>Tyk OSS Gateway</td><td>Fronts both the MCP proxy and the resource API with JWT auth (native OSS feature, two different JWKS sources)</td><td>Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Run it</h3>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>cd part2-token-exchange
+./setup.sh</pre></div>
+    <p>Builds the four images, loads them into kind, turns on the gateway's coprocess/gRPC option, deploys everything, and registers the two Tyk OAS APIs. Then, in separate terminals:</p>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>sudo sh -c 'grep -q "acme-keycloak" /etc/hosts || echo "127.0.0.1 acme-keycloak" >> /etc/hosts'
+kubectl -n tyk-oss port-forward svc/gateway-svc-tyk-oss-tyk-gateway 8080:8080
+kubectl -n tyk-oss port-forward svc/acme-keycloak 8280:8280
+kubectl -n tyk-oss port-forward svc/acme-chat 8095:8090</pre></div>
+    <p>Open <code class="inline">http://localhost:8095</code>, sign in as <strong>alice</strong> (<code class="inline">Acme-Demo-2026!</code>, read-only): "look up a customer" succeeds, "issue a refund" is blocked (403 <code class="inline">insufficient_scope</code>). Sign out, sign in as <strong>bob</strong> (read+refund), and the refund succeeds. The Delegation inspector shows both tokens: same <code class="inline">sub</code>, narrower <code class="inline">scope</code>, <code class="inline">aud</code> re-pointed to <code class="inline">api.acme.internal</code>, <code class="inline">azp</code> = <code class="inline">tyk-mcp-gateway</code>.</p>
+    <p>Prefer a headless check? <code class="inline">./verify.sh</code> (with the gateway and Keycloak port-forwards running) drives the same three scenarios and prints PASS/FAIL — the exact script used to confirm this works before this guide was written.</p>
+
+    <h3>The one landmine worth knowing about before you improvise on stage</h3>
+    <p>If you write your own Tyk policy file for a JWT-auth API's <code class="inline">defaultPolicies</code>: the <code class="inline">tyk-helm/tyk-oss</code> chart sets <strong>both</strong> <code class="inline">Policies.PolicyPath</code> (a directory) and <code class="inline">Policies.PolicyRecordName</code> (a file). Tyk prefers <code class="inline">PolicyPath</code> when set, which decodes every file in that directory as <strong>one single policy object per file</strong> — not the map-of-named-policies shape most classic examples show. Get this wrong and there's no error: the gateway logs "Policies found (N total)" happily, and every request then fails with <code class="inline">policy not found</code>, because the file decoded into an empty struct. Already handled in both <code class="inline">setup.sh</code> scripts.</p>
+  </section>
+
+  <section id="fallback">
+    <p class="sec-eyebrow">08 · Contingency</p>
+    <h2>Fallback: no LLM API key / no Wi-Fi</h2>
+    <p>Point <code class="inline">agent.py</code> and AI Studio at a local model via <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> instead (<code class="inline">ollama pull llama3.1:8b</code>, then configure AI Studio's provider as an OpenAI-compatible Ollama endpoint). Slower, but fully offline and free — worth rehearsing once in case venue Wi-Fi lets you down. It also reinforces the pitch: the governance layer is provider-agnostic.</p>
+  </section>
+
+  <section id="cleanup">
+    <p class="sec-eyebrow">09 · Wrap</p>
+    <h2>Cleanup</h2>
+    <div class="term"><div class="term-bar"><span></span><span></span><span></span></div><pre>kind delete cluster --name kcd-agent-demo
+docker compose -f /tmp/tyk-ai-studio/quickstart/ce/compose.yaml down -v</pre></div>
+    <p>That's it — everything else was namespaced or containerized inside the cluster, or in AI Studio's own Compose stack.</p>
+  </section>
+
+  <section id="troubleshooting">
+    <p class="sec-eyebrow">10 · Reference</p>
+    <h2>Troubleshooting</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>Redis pods stuck <code class="inline">ImagePullBackOff</code></td><td>Bitnami moved free-tier images to <code class="inline">bitnamilegacy/*</code> in 2025 — already handled in <code class="inline">setup.sh</code>; if it still happens, <code class="inline">kubectl delete pod</code> the stuck one.</td></tr>
+          <tr><td><code class="inline">tools/call</code> returns a plain-text 404, not JSON</td><td>Upstream MCP server 404, not Tyk — check <code class="inline">listenPath</code>/<code class="inline">strip</code> leaves the exact path the upstream registered (<code class="inline">/mcp-gw/</code> → <code class="inline">.../mcp-gw/mcp</code> is the pattern used here).</td></tr>
+          <tr><td>"invalid during session initialization"</td><td>Streamable-HTTP MCP needs <code class="inline">initialize</code> → session-id → <code class="inline">notifications/initialized</code> before any <code class="inline">tools/call</code> — see segment 4.</td></tr>
+          <tr><td><code class="inline">policy not found</code> even though boot logs say "Policies found"</td><td>The gateway's policy directory decodes each file as <em>one</em> policy object, not a named map — one policy per file, <code class="inline">id</code> as a top-level field. Already handled in both <code class="inline">setup.sh</code> scripts.</td></tr>
+          <tr><td>Tool allowlist / rate limit silently do nothing (no error, just no enforcement)</td><td>Registered via <code class="inline">POST /tyk/apis/oas</code> instead of <code class="inline">POST /tyk/mcps</code> — <code class="inline">ApplicationProtocol</code> never gets set to <code class="inline">"mcp"</code>, so the gateway's <code class="inline">IsMCP()</code> check stays false and both features stay dark. Re-register via <code class="inline">/tyk/mcps</code> — <code class="inline">setup.sh</code> already does this.</td></tr>
+          <tr><td>Rate limit demo doesn't trip</td><td>Either the endpoint issue above, or you haven't applied a limit yet — <code class="inline">TYK_MCP_KEY</code> starts <strong>unguarded</strong> (no rate limit) by design. Apply one with the <code class="inline">PUT /tyk/keys/{key}</code> in <code class="inline">CHEATSHEET.md</code> §1b; per-tool rate limits live on the <strong>key</strong> (<code class="inline">access_rights.&lt;api_id&gt;.mcp_primitives</code>), not the API definition.</td></tr>
+          <tr><td><code class="inline">PUT /tyk/keys/{key}</code> returns "Key is not found"</td><td>The <code class="inline">{key}</code> path segment needs the full base64 key <strong>value</strong> (URL-encoded), not the custom key ID you picked when creating it. Use <code class="inline">TYK_MCP_KEY</code> itself, URL-encoded — see the <code class="inline">ENC_KEY</code> line in <code class="inline">CHEATSHEET.md</code> §1b.</td></tr>
+          <tr><td>Re-running <code class="inline">setup.sh</code> seems to "lose" a previous registration</td><td>Restarting the gateway pod wipes its emptyDir app store — re-register everything after any restart. Already handled.</td></tr>
+          <tr><td><code class="inline">ModuleNotFoundError: No module named 'openai'</code>, or <code class="inline">TypeError: unsupported operand type(s) for |</code></td><td>Missing deps, or <code class="inline">python3</code> resolves to an old system Python — check <code class="inline">python3 --version</code> is 3.10+, then <code class="inline">pip install -r requirements.txt</code> inside a venv.</td></tr>
+          <tr><td><code class="inline">error: externally-managed-environment</code> from pip</td><td>Homebrew's Python (PEP 668) — use a venv (<code class="inline">python3 -m venv .venv && source .venv/bin/activate</code>) rather than <code class="inline">--break-system-packages</code>.</td></tr>
+          <tr><td><code class="inline">agent.py</code> crashes with a JSON decode error on its first MCP call</td><td>Fixed — <code class="inline">agent.py</code> now does the real session handshake and parses the SSE-formatted response body; if you're still seeing this, you're on an old copy of the script.</td></tr>
+          <tr><td>AI Studio's mgw container crash-loops on "connection refused"</td><td>The shipped <code class="inline">quickstart/confs/mgw-ce.env</code> points <code class="inline">CONTROL_ENDPOINT</code> at the wrong port (9080 instead of the control plane's actual 50051) — already patched by <code class="inline">ai-studio/setup.sh</code>.</td></tr>
+          <tr><td>AI Studio admin API POST returns 403 with a garbled body</td><td>Missing CSRF token — <code class="inline">GET /csrf-token</code> first and send it back as <code class="inline">X-CSRF-Token</code>. Already handled in <code class="inline">ai-studio/setup.sh</code>.</td></tr>
+          <tr><td>AI Studio microgateway (:9091) rejects a valid credential, or later says "LLM not found"</td><td>The edge is permanently stuck out of sync with control (logs repeat this every ~30s forever) — <strong>unresolved</strong> as of this build. See segment 3 and <code class="inline">ai-studio/setup.sh</code>'s own printed output for what's known.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="closing">
+    <p class="sec-eyebrow">11 · Closing line</p>
+    <h2>"Why not just build this into the agent?"</h2>
+    <p>Because then every team building an agent reimplements auth, rate limiting, and audit logging themselves, inconsistently, and usually skips the audit logging. Putting it in a gateway means the policy is centrally owned, applies uniformly across every agent and every MCP server in the org, and shows up in the same dashboards your platform team already watches for REST traffic. That's the whole argument, and it's the one to end on.</p>
+  </section>
+
+  <footer>
+    <p class="toc-title">Sources</p>
+    <ul>
+      <li><a href="https://tyk.io/docs/ai-management/mcp-gateway/overview" target="_blank" rel="noopener">Tyk MCP Gateway — overview</a></li>
+      <li><a href="https://tyk.io/docs/ai-management/mcp-gateway/mcp-proxy-definitions" target="_blank" rel="noopener">Tyk MCP Gateway — proxy definitions</a></li>
+      <li><a href="https://tyk.io/tyk-mcp-gateway/" target="_blank" rel="noopener">Tyk MCP Gateway product page</a> — confirms the full feature set ships in the OSS gateway</li>
+      <li><a href="https://tyk.io/learning-center/mcp-gateway-architecture-technical-guide/" target="_blank" rel="noopener">MCP Gateway: the control plane for enterprise AI agents</a></li>
+      <li><a href="https://tyk.io/docs/5.7/tyk-open-source/" target="_blank" rel="noopener">Tyk OSS Helm chart docs</a></li>
+      <li><a href="https://github.com/TykTechnologies/tyk-mock-mcp-server" target="_blank" rel="noopener">GitHub — TykTechnologies/tyk-mock-mcp-server</a></li>
+      <li><a href="https://github.com/TykTechnologies/ai-studio" target="_blank" rel="noopener">GitHub — TykTechnologies/ai-studio</a></li>
+      <li><a href="https://tyk.io/blog/ai-studio-is-going-open-source-and-why-the-ai-control-plane-must-be-extensible/" target="_blank" rel="noopener">Tyk AI Studio — going open source</a></li>
+      <li><a href="https://tyk.io/docs/ai-management/ai-studio/overview" target="_blank" rel="noopener">Tyk AI Studio overview docs</a></li>
+      <li><a href="https://tyk.io/docs/ai-management/ai-studio/quickstart" target="_blank" rel="noopener">Tyk AI Studio quickstart docs</a></li>
+      <li><a href="https://tyk.io/docs/plugins/rich-plugins/grpc-plugins/" target="_blank" rel="noopener">Tyk gRPC / rich plugins docs</a> — the OSS plugin mechanism Part 2's token-exchange plugin is built on</li>
+      <li><a href="https://github.com/TykTechnologies/tyk/tree/master/coprocess/bindings/python" target="_blank" rel="noopener">TykTechnologies/tyk — coprocess/bindings/python</a> — the pre-generated protobuf/gRPC bindings vendored into Part 2's plugin</li>
+      <li><code class="inline">tyk-demo</code> repo, <code class="inline">deployments/mcp-token-exchange</code> — the original (Enterprise-licensed) Acme Support Copilot demo Part 2 reimplements on OSS</li>
+    </ul>
+  </footer>
+
+</div>

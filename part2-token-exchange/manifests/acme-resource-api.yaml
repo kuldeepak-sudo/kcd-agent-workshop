@@ -1,0 +1,38 @@
+# The Acme "resource API" — a minimal stand-in for a real customer/billing
+# system. Independently verifies the exchanged JWT (against the plugin's own
+# JWKS) and enforces the narrowed scope per operation. See services/acme-
+# resource-api/main.go.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acme-resource-api
+  namespace: tyk-oss
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: acme-resource-api }
+  template:
+    metadata:
+      labels: { app: acme-resource-api }
+    spec:
+      containers:
+        - name: acme-resource-api
+          image: acme-resource-api:local
+          imagePullPolicy: IfNotPresent
+          env:
+            - { name: JWKS_URL, value: "http://acme-token-exchange-plugin.tyk-oss.svc.cluster.local:8081/.well-known/jwks.json" }
+            - { name: EXPECTED_AUD, value: "api.acme.internal" }
+          ports: [{ containerPort: 8181 }]
+          readinessProbe:
+            httpGet: { path: /health, port: 8181 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: acme-resource-api
+  namespace: tyk-oss
+spec:
+  selector: { app: acme-resource-api }
+  ports: [{ port: 8181, targetPort: 8181 }]

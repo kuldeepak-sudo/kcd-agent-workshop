@@ -1,0 +1,62 @@
+# Keycloak (Apache-2.0, open source) — identity provider for the Acme Support
+# Copilot demo. The realm (users alice/bob, entitlements attribute, client
+# scopes) is auto-imported from a ConfigMap on every pod start.
+#
+# The ConfigMap itself is NOT defined here — realm-acme.json is generated
+# content that's easier to keep in sync via `kubectl create configmap
+# --from-file` than to hand-embed in YAML (see part2-token-exchange/setup.sh):
+#
+#   kubectl create configmap acme-keycloak-realm -n tyk-oss \
+#     --from-file=realm-acme.json=part2-token-exchange/realm/realm-acme.json \
+#     --dry-run=client -o yaml | kubectl apply -f -
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acme-keycloak
+  namespace: tyk-oss
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: acme-keycloak }
+  template:
+    metadata:
+      labels: { app: acme-keycloak }
+    spec:
+      containers:
+        - name: acme-keycloak
+          image: quay.io/keycloak/keycloak:26.3
+          args: ["start-dev", "--import-realm"]
+          env:
+            - { name: KC_BOOTSTRAP_ADMIN_USERNAME, value: "admin" }
+            - { name: KC_BOOTSTRAP_ADMIN_PASSWORD, value: "admin" }
+            # Bare short name (not the FQDN): this must be the SAME literal
+            # hostname the browser uses (via a port-forward + /etc/hosts entry,
+            # see setup.sh) so the issuer Keycloak stamps into tokens matches
+            # what the browser round-trips through the auth-code flow.
+            - { name: KC_HOSTNAME, value: "http://acme-keycloak:8280" }
+            - { name: KC_HTTP_PORT, value: "8280" }
+            - { name: KC_HTTP_ENABLED, value: "true" }
+            - { name: KC_HEALTH_ENABLED, value: "true" }
+          ports: [{ containerPort: 8280 }]
+          volumeMounts:
+            - name: realm
+              mountPath: /opt/keycloak/data/import/realm-acme.json
+              subPath: realm-acme.json
+          readinessProbe:
+            httpGet: { path: /realms/acme/.well-known/openid-configuration, port: 8280 }
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            failureThreshold: 24
+      volumes:
+        - name: realm
+          configMap: { name: acme-keycloak-realm }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: acme-keycloak
+  namespace: tyk-oss
+spec:
+  selector: { app: acme-keycloak }
+  ports: [{ port: 8280, targetPort: 8280 }]
