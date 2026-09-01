@@ -64,6 +64,25 @@ export TYK_MCP_URL="http://localhost:8080/mcp-gw/mcp"
 export TYK_MCP_KEY="$(cat /tmp/tyk_mcp_key.txt)"
 ```
 
+Install and run the actual agent once, as a sanity check before the room fills
+up:
+
+```bash
+python3 --version   # needs 3.10+
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python agent.py "How many users are in the system, and who is user 1?"
+```
+
+This is where `agent.py` gets run — nowhere else in this cheat sheet calls it.
+Everything below in §1 uses raw `curl` instead, on purpose: it's showing you
+what the gateway itself is doing underneath the one line above, tool call by
+tool call, allow/deny decision by decision. If you haven't set
+`AI_STUDIO_BASE_URL` / `AI_STUDIO_API_KEY` / `AI_STUDIO_MODEL` yet (Part 2
+hasn't run, or you haven't wired in a real LLM key), `agent.py` genuinely
+falls back to a no-LLM mode: it lists the available tools and calls one
+directly, so this still demos the governed tool-call path end to end.
+
 ---
 
 ## 1. Part 1 — MCP tool governance (Tyk OSS Gateway)
