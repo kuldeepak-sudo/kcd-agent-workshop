@@ -27,13 +27,20 @@ cd part2-token-exchange && ./setup.sh && cd ..
 All three are idempotent — safe to re-run any of them mid-workshop if something
 needs restarting.
 
+One-time host entry (needed for the browser's Keycloak login redirect in Part 3 — the chat UI's OAuth URLs use the hostname `acme-keycloak`, not `localhost`):
+
+```bash
+echo "127.0.0.1 acme-keycloak" | sudo tee -a /etc/hosts
+```
+
 Keep these port-forwards running in background terminals for the rest of the
-session:
+session (note `acme-chat` maps local `8095` to the container's port `8090` —
+they're deliberately not the same number):
 
 ```bash
 kubectl -n tyk-oss port-forward svc/gateway-svc-tyk-oss-tyk-gateway 8080:8080
 kubectl -n tyk-oss port-forward svc/acme-keycloak 8280:8280
-kubectl -n tyk-oss port-forward svc/acme-chat 8095:8095
+kubectl -n tyk-oss port-forward svc/acme-chat 8095:8090
 ```
 
 Set the Part 1 demo env vars (the key is fixed — `setup.sh` always produces the
