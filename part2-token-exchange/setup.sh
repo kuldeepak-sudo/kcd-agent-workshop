@@ -25,6 +25,8 @@ GATEWAY_LOCAL=http://localhost:8080
 # duplicate API registrations piling up on every re-run).
 ACME_MCP_ID=87ba7c68b57f45ed85269b5a3ad897d4
 ACME_API_ID=7cec799338bb41b58627cb21ab047640
+# Matches MOCK_API_ID in ../setup.sh — see the re-registration step below.
+MOCK_API_ID=bd14dd7bcd764110b0e8bfac22c11a0c
 
 echo "==> Building images"
 docker build -t acme-token-exchange-plugin:local services/token-exchange-plugin
@@ -127,7 +129,14 @@ for i in $(seq 1 20); do
 done
 if [ -f ../tyk/mcp-proxy.json ]; then
   echo "  - ../tyk/mcp-proxy.json (Part 1)"
-  curl -sf "$GATEWAY_LOCAL/tyk/apis/oas" \
+  # ⚠ Must be /tyk/mcps, not /tyk/apis/oas — the generic endpoint never sets
+  # ApplicationProtocol="mcp", which silently disables Part 1's tool allowlist
+  # and per-tool rate limit with no error anywhere (see ../setup.sh's header
+  # comment and ../lab-guide.md §4.3 for the full finding). A real regression
+  # was caught here: this line used to POST to /tyk/apis/oas, which put Part
+  # 1's demo back into an ungoverned state every time Part 2 was set up after
+  # it, even though ../setup.sh itself had already been fixed to use /tyk/mcps.
+  curl -sf "$GATEWAY_LOCAL/tyk/mcps" \
     -H "x-tyk-authorization: $APISecret" -H "Content-Type: application/json" \
     -d @../tyk/mcp-proxy.json | python3 -m json.tool
 fi
@@ -140,7 +149,7 @@ done
 curl -s "$GATEWAY_LOCAL/tyk/reload/group" -H "x-tyk-authorization: $APISecret"
 echo
 
-echo "==> Waiting for the gateway to pick up both registrations"
+echo "==> Waiting for the gateway to pick up both Part 2 registrations"
 for i in $(seq 1 20); do
   BOTH=$(curl -s "$GATEWAY_LOCAL/tyk/apis" -H "x-tyk-authorization: $APISecret" | python3 -c "
 import json,sys
@@ -157,6 +166,27 @@ done
 if [ "$BOTH" != "yes" ]; then
   echo "acme-mcp-proxy / acme-api never both showed up in /tyk/apis — aborting."
   exit 1
+fi
+
+if [ -f ../tyk/mcp-proxy.json ]; then
+  echo "==> Waiting for Part 1's re-registration to land in /tyk/mcps (not /tyk/apis)"
+  for i in $(seq 1 20); do
+    FOUND=$(curl -s "$GATEWAY_LOCAL/tyk/mcps" -H "x-tyk-authorization: $APISecret" | python3 -c "
+import json,sys
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    d = []
+ids = {a.get('x-tyk-api-gateway',{}).get('info',{}).get('id') for a in d}
+print('yes' if '$MOCK_API_ID' in ids else '')
+")
+    [ "$FOUND" = "yes" ] && break
+    sleep 1
+  done
+  if [ "$FOUND" != "yes" ]; then
+    echo "mock-mcp-governed never showed up in /tyk/mcps after re-registering — Part 1's demo will be ungoverned. Re-run ../setup.sh to fix."
+    exit 1
+  fi
 fi
 
 echo "==> Done. Add to /etc/hosts (needed once):  127.0.0.1 acme-keycloak"
