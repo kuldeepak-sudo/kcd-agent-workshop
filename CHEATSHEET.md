@@ -33,15 +33,28 @@ One-time host entry (needed for the browser's Keycloak login redirect in Part 3 
 echo "127.0.0.1 acme-keycloak" | sudo tee -a /etc/hosts
 ```
 
-Keep these port-forwards running in background terminals for the rest of the
-session (note `acme-chat` maps local `8095` to the container's port `8090` —
-they're deliberately not the same number):
+Keep these port-forwards running for the rest of the session — one per
+terminal tab, and **don't reuse that tab for anything else** (note `acme-chat`
+maps local `8095` to the container's port `8090`; they're deliberately not
+the same number). `kubectl port-forward` drops silently on a network blip or
+laptop sleep with no error in the browser, just a dead connection — the `until`
+loop below auto-restarts it if that happens, confirmed live to be a real,
+repeatable failure mode during testing, not a hypothetical one:
 
 ```bash
-kubectl -n tyk-oss port-forward svc/gateway-svc-tyk-oss-tyk-gateway 8080:8080
-kubectl -n tyk-oss port-forward svc/acme-keycloak 8280:8280
-kubectl -n tyk-oss port-forward svc/acme-chat 8095:8090
+until kubectl -n tyk-oss port-forward svc/gateway-svc-tyk-oss-tyk-gateway 8080:8080; do echo "gateway pf died, restarting..."; sleep 1; done
 ```
+```bash
+until kubectl -n tyk-oss port-forward svc/acme-keycloak 8280:8280; do echo "keycloak pf died, restarting..."; sleep 1; done
+```
+```bash
+until kubectl -n tyk-oss port-forward svc/acme-chat 8095:8090; do echo "chat pf died, restarting..."; sleep 1; done
+```
+
+If a browser step ever says a host "refused to connect" mid-demo, it's almost
+always one of these three having silently died — check with
+`lsof -i :8080 -sTCP:LISTEN` / `:8280` / `:8095` before assuming anything else
+is wrong.
 
 Set the Part 1 demo env vars (the key is fixed — `setup.sh` always produces the
 same value, so this only needs doing once per shell):
